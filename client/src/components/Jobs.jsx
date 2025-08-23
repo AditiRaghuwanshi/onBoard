@@ -313,7 +313,7 @@ const Jobs = () => {
                             selectedSkill.toLowerCase().includes(skill.toLowerCase())
                         )
                     );
-                   ;
+                   
                     if (!skillsMatch) {
                         console.log(` Job "${job.title}" filtered out by skills`);
                         return false;
