@@ -44,7 +44,7 @@ const Navbar = () => {
                         className="text-2xl font-bold text-white cursor-pointer flex items-center"
                         onClick={ () => navigate('/') }
                     >
-                        On <span className="text-blue-900">Board</span>
+                        On <span className="text-blue-300">Board</span>
                     </div>
 
                     {/* Mobile Menu Toggle */ }

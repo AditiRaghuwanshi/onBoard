@@ -1,5 +1,7 @@
-// const BASE_URL = "https://hire-hub-psi.vercel.app/api/v1";
-const BASE_URL = "http://localhost:8000/api/v1";
+
+// const BASE_URL = "http://localhost:8000/api/v1";
+const BASE_URL = "https://onboard-backend.onrender.com";
+
 
 export const USER_API_END_POINT = `${BASE_URL}/user`;
 export const JOB_API_END_POINT = `${BASE_URL}/job`;
