@@ -1,0 +1,108 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import {  useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { setSelectedFilters } from '@/redux/jobSlice'; // ✅ Now this will work with your updated slice
+import { motion } from 'framer-motion';
+
+const filterData = [
+    {
+        filterType: "Location",
+        array: ["Delhi NCR", "Bangalore", "Hyderabad", "Pune", "Mumbai"],
+    },
+    {
+        filterType: "Industry", 
+        array: ["Frontend Developer", "Backend Developer", "FullStack Developer"],
+    },
+    {
+        filterType: "Skills",
+        array: ["React.js", "Java", "DevOps", "Swift", "Flutter", "AWS"]
+    },
+    {
+        filterType: "Salary", // ✅ Fixed: Changed to uppercase to match your Jobs.jsx
+        array: ["0-3", "3-6", "6-10", "10-15", "15+"] // ✅ Fixed: Removed "LPA" for easier comparison
+    }
+];
+
+const FilterCard = () => {
+    const [selectedFilters, setSelectedFiltersState] = useState({
+        Location: [],
+        Industry: [],
+        Skills: [],
+        Salary: [] 
+    });
+
+    const dispatch = useDispatch();
+
+    // Handle selection of filters, toggle on and off
+    const handleFilterChange = (filterType, value) => {
+        setSelectedFiltersState((prevFilters) => {
+            const currentSelections = prevFilters[filterType];
+
+            // If the value is already selected, remove it; otherwise, add it
+            const newSelections = currentSelections.includes(value)
+                ? currentSelections.filter((item) => item !== value)
+                : [...currentSelections, value];
+
+            const updatedFilters = {
+                ...prevFilters,
+                [filterType]: newSelections,
+            };
+
+            // ✅ Fixed: Dispatch filters to Redux instead of search query
+            dispatch(setSelectedFilters(updatedFilters));
+            
+            return updatedFilters;
+        });
+    };
+
+    console.log("Current Selected Filters:", selectedFilters);
+
+    return (
+        <motion.div
+            className="w-full bg-transparent p-5 rounded-md shadow-md sm:w-11/12 md:w-3/4 lg:w-1/2 xl:w-1/3"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+        >
+            <h1 className="font-bold text-lg text-blue-700">Filter Jobs</h1>
+            <hr className="mt-3" />
+            {filterData.map((data, index) => (
+                <div key={index} className="mt-3">
+                    <h1 className="font-bold text-md text-blue-600">{data.filterType}</h1>
+                    {data.array.map((item, idx) => {
+                        const itemId = `id${index}-${idx}`;
+                        const isChecked = (selectedFilters[data.filterType] || []).includes(item);
+
+                        return (
+                            <div key={itemId} className="flex items-center space-x-2 my-2">
+                                <input
+                                    type="checkbox"
+                                    id={itemId}
+                                    checked={isChecked}
+                                    onChange={() => handleFilterChange(data.filterType, item)}
+                                    className="text-blue-600"
+                                />
+                                <label htmlFor={itemId} className="text-blue-600">{item}</label>
+                            </div>
+                        );
+                    })}
+                </div>
+            ))}
+        </motion.div>
+    );
+};
+
+export default FilterCard;
