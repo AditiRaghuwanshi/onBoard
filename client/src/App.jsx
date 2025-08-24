@@ -1,5 +1,5 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-
+import axios from 'axios'
 import Login from './components/auth/Login'
 import Signup from './components/auth/Signup'
 import Home from './components/Home'
@@ -76,10 +76,23 @@ const appRouter = createBrowserRouter([
   }
 
 ])
+
+// Add this for debugging
+axios.interceptors.response.use(
+    (response) => {
+        console.log('✅ Axios Response Success:', response.status, response.data);
+        return response;
+    },
+    (error) => {
+        console.error('❌ Axios Response Error:', error.response || error.request || error.message);
+        return Promise.reject(error);
+    }
+);
 function App() {
 
   return (
     <div className='app'>
+      
       <RouterProvider router={ appRouter } />
     </div>
   )

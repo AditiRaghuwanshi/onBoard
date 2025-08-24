@@ -34,37 +34,85 @@ const Signup = () => {
         setProfilePicture(e.target.files[0]); // Save the selected file
     };
 
+    // const submitHandler = async (e) => {
+    //     e.preventDefault();
+    //     try {
+    //         dispatch(setLoading(true));
+
+    //         // Creating form data
+    //         const formData = new FormData();
+    //         Object.keys(input).forEach((key) => formData.append(key, input[key]));
+    //         if (profilePicture) {
+    //             formData.append('file', profilePicture);
+    //         }
+
+    //         const res = await axios.post(`${USER_API_END_POINT}/signup`, formData, {
+    //             headers: {
+    //                 'Content-Type': 'multipart/form-data',
+    //             },
+    //             withCredentials: true,
+    //         });
+
+    //         if (res.data.success) {
+    //             navigate('/login');
+    //             toast.success(res.data.message);
+    //         }
+    //     } catch (error) {
+    //         console.error(error);
+    //         toast.error(error.response?.data?.message);
+    //     } finally {
+    //         dispatch(setLoading(false));
+    //     }
+    // };
+
+
     const submitHandler = async (e) => {
-        e.preventDefault();
-        try {
-            dispatch(setLoading(true));
+    e.preventDefault();
+    try {
+        dispatch(setLoading(true));
 
-            // Creating form data
-            const formData = new FormData();
-            Object.keys(input).forEach((key) => formData.append(key, input[key]));
-            if (profilePicture) {
-                formData.append('file', profilePicture);
-            }
-
-            const res = await axios.post(`${USER_API_END_POINT}/signup`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
-                withCredentials: true,
-            });
-
-            if (res.data.success) {
-                navigate('/login');
-                toast.success(res.data.message);
-            }
-        } catch (error) {
-            console.error(error);
-            toast.error(error.response?.data?.message);
-        } finally {
-            dispatch(setLoading(false));
+        // Creating form data
+        const formData = new FormData();
+        Object.keys(input).forEach((key) => formData.append(key, input[key]));
+        if (profilePicture) {
+            formData.append('file', profilePicture);
         }
-    };
 
+        console.log('🚀 Sending signup request...');
+        const res = await axios.post(`${USER_API_END_POINT}/signup`, formData, {
+            // headers: {
+            //     'Content-Type': 'multipart/form-data',
+            // },
+            withCredentials: true,
+            timeout: 30000, // 30 seconds timeout
+        });
+
+        console.log('✅ Signup response received:', res.data);
+        
+        if (res.data.success) {
+            navigate('/login');
+            toast.success(res.data.message);
+        }
+    } catch (error) {
+        console.error('❌ Signup error details:', error);
+        
+        if (error.response) {
+            // Server responded with error status
+            console.log('Server error response:', error.response.data);
+            toast.error(error.response.data.message || 'Server error occurred');
+        } else if (error.request) {
+            // Request made but no response received
+            console.log('No response received:', error.request);
+            toast.error('Network error - please check your connection and try again');
+        } else {
+            // Something else happened
+            console.log('Request setup error:', error.message);
+            toast.error('An unexpected error occurred');
+        }
+    } finally {
+        dispatch(setLoading(false));
+    }
+};
     useEffect(() => {
         if (user) {
             navigate('/');
