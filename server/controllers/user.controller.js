@@ -71,41 +71,45 @@ import cloudinary from "../utils/cloudinary.js";
 //     }
 // };
 
-
 export const register = async(req, res) => {
     try {
         console.log('=== REGISTER FUNCTION STARTED ===');
+        console.log('Request headers:', req.headers);
+        
         const { fullname, email, password, role, phoneNumber } = req.body;
         console.log('Data received:', { fullname, email, password: password ? 'PROVIDED' : 'MISSING', role, phoneNumber });
 
-        // Check if any required field is missing
+        // Your existing validation logic...
         if (!fullname || !email || !password || !role || !phoneNumber) {
-            console.log('❌ Missing fields detected');
-            return res.status(400).json({
+            console.log('❌ Missing fields, sending 400 response');
+            const errorResponse = {
                 message: "Required All Fields",
                 success: false,
-            });
+            };
+            console.log('Sending error response:', errorResponse);
+            return res.status(400).json(errorResponse);
         }
 
         console.log('✅ All fields present');
-
         console.log('🔍 Checking for existing user...');
-        const existingUser = await User.findOne({ email });
-        console.log('Existing user check result:', existingUser ? 'USER EXISTS' : 'NO EXISTING USER');
         
+        const existingUser = await User.findOne({ email });
         if (existingUser) {
-            console.log('❌ User already exists, sending error response');
-            return res.status(400).json({
+            console.log('❌ User exists, sending 400 response');
+            const errorResponse = {
                 message: 'User already exists with this email.',
                 success: false,
-            });
+            };
+            console.log('Sending error response:', errorResponse);
+            res.status(400).json(errorResponse);
+            console.log('✅ Error response sent successfully');
+            return;
         }
 
         console.log('🔐 Hashing password...');
         const hashedPassword = await bcrypt.hash(password, 10);
-        console.log('✅ Password hashed successfully');
-
-        console.log('📝 Creating new user in database...');
+        
+        console.log('📝 Creating new user...');
         const newUser = await User.create({
             fullname,
             email,
@@ -113,13 +117,12 @@ export const register = async(req, res) => {
             role,
             phoneNumber,
             profile: {
-                profilePhoto: null, // Temporarily remove file upload
+                profilePhoto: null,
             },
         });
-        console.log('✅ User created successfully with ID:', newUser._id);
-
-        console.log('📤 Sending success response...');
-        return res.status(201).json({
+        
+        console.log('✅ User created successfully:', newUser._id);
+        const successResponse = {
             message: "Account created successfully.",
             success: true,
             user: {
@@ -129,15 +132,22 @@ export const register = async(req, res) => {
                 role: newUser.role,
                 profilePhoto: newUser.profile.profilePhoto,
             },
-        });
+        };
+        
+        console.log('📤 Sending success response:', successResponse);
+        res.status(201).json(successResponse);
+        console.log('✅ Success response sent successfully');
+        
     } catch (error) {
-        console.error('💥 REGISTER ERROR:', error.message);
-        console.error('Full error:', error);
-        return res.status(500).json({
+        console.error('💥 REGISTER ERROR:', error);
+        const errorResponse = {
             message: "Server error",
             success: false,
             error: error.message,
-        });
+        };
+        console.log('Sending server error response:', errorResponse);
+        res.status(500).json(errorResponse);
+        console.log('✅ Server error response sent');
     }
 };
 

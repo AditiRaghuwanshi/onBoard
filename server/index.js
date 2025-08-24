@@ -36,7 +36,18 @@ connectDB()
     console.error(" Database connection failed", err);
     process.exit(1);
   });
-
+// Add this middleware before your routes
+app.use((req, res, next) => {
+    const oldSend = res.send;
+    res.send = function(data) {
+        console.log(`📤 Response sent for ${req.method} ${req.path}:`, {
+            status: res.statusCode,
+            data: data
+        });
+        oldSend.apply(this, arguments);
+    };
+    next();
+});
 // ✅ routes
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/company", companyRoute);
