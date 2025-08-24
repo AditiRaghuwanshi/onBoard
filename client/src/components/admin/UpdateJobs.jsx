@@ -236,7 +236,7 @@ const UpdateJobs = () => {
     useEffect(() => {
         const fetchCompanies = async () => {
             try {
-                const response = await axios.get(`${COMPANY_API_END_POINT}/get`, {
+                const response = await .get(`${COMPANY_API_END_POINT}/get`, {
                     withCredentials: true
                 });
                 if (response.data.success) {

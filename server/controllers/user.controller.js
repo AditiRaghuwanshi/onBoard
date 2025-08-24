@@ -4,51 +4,121 @@ import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 
+// export const register = async(req, res) => {
+//     try {
+//         const { fullname, email, password, role, phoneNumber } = req.body;
+
+//         console.log(fullname, email, password, role);
+
+//         // Check if any required field is missing
+//         if (!fullname || !email || !password || !role || !phoneNumber) {
+//             return res.status(400).json({
+//                 message: "Required All Fileds",
+//                 success: false,
+//             });
+//         }
+
+
+//         let profilePhotoUrl = null;
+//         const file = req.file;
+//         if (file) {
+//             const fileUri = getDataUri(file);
+//             const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+//             profilePhotoUrl = cloudResponse.secure_url;
+//         }
+
+//         const existingUser = await User.findOne({ email });
+//         if (existingUser) {
+//             return res.status(400).json({
+//                 message: 'User already exists with this email.',
+//                 success: false,
+//             });
+//         }
+
+//         const hashedPassword = await bcrypt.hash(password, 10);
+
+//         const newUser = await User.create({
+//             fullname,
+//             email,
+
+//             password: hashedPassword,
+//             role,
+//             phoneNumber,
+//             profile: {
+//                 profilePhoto: profilePhotoUrl,
+//             },
+//         });
+
+//         return res.status(201).json({
+//             message: "Account created successfully.",
+//             success: true,
+//             user: {
+//                 fullname: newUser.fullname,
+//                 email: newUser.email,
+//                 phoneNumber: newUser.phoneNumber,
+//                 role: newUser.role,
+//                 profilePhoto: newUser.profile.profilePhoto,
+//             },
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         return res.status(500).json({
+//             message: "Server error",
+//             success: false,
+//             error: error.message,
+//             false: error
+//         });
+//     }
+// };
+
+
 export const register = async(req, res) => {
     try {
+        console.log('=== REGISTER FUNCTION STARTED ===');
         const { fullname, email, password, role, phoneNumber } = req.body;
-
-        console.log(fullname, email, password, role);
+        console.log('Data received:', { fullname, email, password: password ? 'PROVIDED' : 'MISSING', role, phoneNumber });
 
         // Check if any required field is missing
         if (!fullname || !email || !password || !role || !phoneNumber) {
+            console.log('❌ Missing fields detected');
             return res.status(400).json({
-                message: "Required All Fileds",
+                message: "Required All Fields",
                 success: false,
             });
         }
 
+        console.log('✅ All fields present');
 
-        let profilePhotoUrl = null;
-        const file = req.file;
-        if (file) {
-            const fileUri = getDataUri(file);
-            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-            profilePhotoUrl = cloudResponse.secure_url;
-        }
-
+        console.log('🔍 Checking for existing user...');
         const existingUser = await User.findOne({ email });
+        console.log('Existing user check result:', existingUser ? 'USER EXISTS' : 'NO EXISTING USER');
+        
         if (existingUser) {
+            console.log('❌ User already exists, sending error response');
             return res.status(400).json({
                 message: 'User already exists with this email.',
                 success: false,
             });
         }
 
+        console.log('🔐 Hashing password...');
         const hashedPassword = await bcrypt.hash(password, 10);
+        console.log('✅ Password hashed successfully');
 
+        console.log('📝 Creating new user in database...');
         const newUser = await User.create({
             fullname,
             email,
-
             password: hashedPassword,
             role,
             phoneNumber,
             profile: {
-                profilePhoto: profilePhotoUrl,
+                profilePhoto: null, // Temporarily remove file upload
             },
         });
+        console.log('✅ User created successfully with ID:', newUser._id);
 
+        console.log('📤 Sending success response...');
         return res.status(201).json({
             message: "Account created successfully.",
             success: true,
@@ -61,12 +131,12 @@ export const register = async(req, res) => {
             },
         });
     } catch (error) {
-        console.error(error);
+        console.error('💥 REGISTER ERROR:', error.message);
+        console.error('Full error:', error);
         return res.status(500).json({
             message: "Server error",
             success: false,
             error: error.message,
-            false: error
         });
     }
 };
