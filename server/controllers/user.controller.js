@@ -4,125 +4,52 @@ import jwt from "jsonwebtoken";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
 
-// export const register = async(req, res) => {
-//     try {
-//         const { fullname, email, password, role, phoneNumber } = req.body;
-
-//         console.log(fullname, email, password, role);
-
-//         // Check if any required field is missing
-//         if (!fullname || !email || !password || !role || !phoneNumber) {
-//             return res.status(400).json({
-//                 message: "Required All Fileds",
-//                 success: false,
-//             });
-//         }
-
-
-//         let profilePhotoUrl = null;
-//         const file = req.file;
-//         if (file) {
-//             const fileUri = getDataUri(file);
-//             const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
-//             profilePhotoUrl = cloudResponse.secure_url;
-//         }
-
-//         const existingUser = await User.findOne({ email });
-//         if (existingUser) {
-//             return res.status(400).json({
-//                 message: 'User already exists with this email.',
-//                 success: false,
-//             });
-//         }
-
-//         const hashedPassword = await bcrypt.hash(password, 10);
-
-//         const newUser = await User.create({
-//             fullname,
-//             email,
-
-//             password: hashedPassword,
-//             role,
-//             phoneNumber,
-//             profile: {
-//                 profilePhoto: profilePhotoUrl,
-//             },
-//         });
-
-//         return res.status(201).json({
-//             message: "Account created successfully.",
-//             success: true,
-//             user: {
-//                 fullname: newUser.fullname,
-//                 email: newUser.email,
-//                 phoneNumber: newUser.phoneNumber,
-//                 role: newUser.role,
-//                 profilePhoto: newUser.profile.profilePhoto,
-//             },
-//         });
-//     } catch (error) {
-//         console.error(error);
-//         return res.status(500).json({
-//             message: "Server error",
-//             success: false,
-//             error: error.message,
-//             false: error
-//         });
-//     }
-// };
-
 export const register = async(req, res) => {
     try {
-        console.log('=== REGISTER FUNCTION STARTED ===');
-        console.log('Request headers:', req.headers);
-        
         const { fullname, email, password, role, phoneNumber } = req.body;
-        console.log('Data received:', { fullname, email, password: password ? 'PROVIDED' : 'MISSING', role, phoneNumber });
 
-        // Your existing validation logic...
+        console.log(fullname, email, password, role);
+
+        // Check if any required field is missing
         if (!fullname || !email || !password || !role || !phoneNumber) {
-            console.log('❌ Missing fields, sending 400 response');
-            const errorResponse = {
-                message: "Required All Fields",
+            return res.status(400).json({
+                message: "Required All Fileds",
                 success: false,
-            };
-            console.log('Sending error response:', errorResponse);
-            return res.status(400).json(errorResponse);
+            });
         }
 
-        console.log('✅ All fields present');
-        console.log('🔍 Checking for existing user...');
-        
+
+        let profilePhotoUrl = null;
+        const file = req.file;
+        if (file) {
+            const fileUri = getDataUri(file);
+            const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
+            profilePhotoUrl = cloudResponse.secure_url;
+        }
+
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            console.log('❌ User exists, sending 400 response');
-            const errorResponse = {
+            return res.status(400).json({
                 message: 'User already exists with this email.',
                 success: false,
-            };
-            console.log('Sending error response:', errorResponse);
-            res.status(400).json(errorResponse);
-            console.log('✅ Error response sent successfully');
-            return;
+            });
         }
 
-        console.log('🔐 Hashing password...');
         const hashedPassword = await bcrypt.hash(password, 10);
-        
-        console.log('📝 Creating new user...');
+
         const newUser = await User.create({
             fullname,
             email,
+
             password: hashedPassword,
             role,
             phoneNumber,
             profile: {
-                profilePhoto: null,
+                profilePhoto: profilePhotoUrl,
             },
         });
-        
-        console.log('✅ User created successfully:', newUser._id);
-        const successResponse = {
+
+        return res.status(201).json({
             message: "Account created successfully.",
             success: true,
             user: {
@@ -132,24 +59,97 @@ export const register = async(req, res) => {
                 role: newUser.role,
                 profilePhoto: newUser.profile.profilePhoto,
             },
-        };
-        
-        console.log('📤 Sending success response:', successResponse);
-        res.status(201).json(successResponse);
-        console.log('✅ Success response sent successfully');
-        
+        });
     } catch (error) {
-        console.error('💥 REGISTER ERROR:', error);
-        const errorResponse = {
+        console.error(error);
+        return res.status(500).json({
             message: "Server error",
             success: false,
             error: error.message,
-        };
-        console.log('Sending server error response:', errorResponse);
-        res.status(500).json(errorResponse);
-        console.log('✅ Server error response sent');
+            false: error
+        });
     }
 };
+
+// export const register = async(req, res) => {
+//     try {
+//         console.log('=== REGISTER FUNCTION STARTED ===');
+//         console.log('Request headers:', req.headers);
+        
+//         const { fullname, email, password, role, phoneNumber } = req.body;
+//         console.log('Data received:', { fullname, email, password: password ? 'PROVIDED' : 'MISSING', role, phoneNumber });
+
+//         // Your existing validation logic...
+//         if (!fullname || !email || !password || !role || !phoneNumber) {
+//             console.log('❌ Missing fields, sending 400 response');
+//             const errorResponse = {
+//                 message: "Required All Fields",
+//                 success: false,
+//             };
+//             console.log('Sending error response:', errorResponse);
+//             return res.status(400).json(errorResponse);
+//         }
+
+//         console.log('✅ All fields present');
+//         console.log('🔍 Checking for existing user...');
+        
+//         const existingUser = await User.findOne({ email });
+//         if (existingUser) {
+//             console.log('❌ User exists, sending 400 response');
+//             const errorResponse = {
+//                 message: 'User already exists with this email.',
+//                 success: false,
+//             };
+//             console.log('Sending error response:', errorResponse);
+//             res.status(400).json(errorResponse);
+//             console.log('✅ Error response sent successfully');
+//             return;
+//         }
+
+//         console.log('🔐 Hashing password...');
+//         const hashedPassword = await bcrypt.hash(password, 10);
+        
+//         console.log('📝 Creating new user...');
+//         const newUser = await User.create({
+//             fullname,
+//             email,
+//             password: hashedPassword,
+//             role,
+//             phoneNumber,
+//             profile: {
+//                 profilePhoto: null,
+//             },
+//         });
+        
+//         console.log('✅ User created successfully:', newUser._id);
+//         const successResponse = {
+//             message: "Account created successfully.",
+//             success: true,
+//             user: {
+//                 fullname: newUser.fullname,
+//                 email: newUser.email,
+//                 phoneNumber: newUser.phoneNumber,
+//                 role: newUser.role,
+//                 profilePhoto: newUser.profile.profilePhoto,
+//             },
+//         };
+        
+//         console.log('📤 Sending success response:', successResponse);
+//         res.status(201).json(successResponse);
+//         console.log('✅ Success response sent successfully');
+        
+//     } catch (error) {
+//         console.error('💥 REGISTER ERROR:', error);
+//         const errorResponse = {
+//             message: "Server error",
+//             success: false,
+//             error: error.message,
+//         };
+//         console.log('Sending server error response:', errorResponse);
+//         res.status(500).json(errorResponse);
+//         console.log('✅ Server error response sent');
+//     }
+// };
 
 export const login = async(req, res) => {
     try {
