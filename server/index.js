@@ -17,11 +17,28 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// const corsOptions = {
+//   origin: process.env.FRONTEND_URL,
+//   credentials: true,
+// };
+// app.use(cors(corsOptions));
+
 const corsOptions = {
-  origin: process.env.FRONTEND_URL,
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5173',
+    'https://on-board-phi.vercel.app'  // Your Vercel URL
+  ],
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200 // Add this for older browsers
 };
+
 app.use(cors(corsOptions));
+
+// Add this middleware to handle preflight for all routes
+app.options('*', cors(corsOptions));
 
 const PORT = process.env.PORT || 8000;
 
